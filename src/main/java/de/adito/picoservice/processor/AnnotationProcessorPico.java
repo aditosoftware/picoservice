@@ -43,11 +43,15 @@ public class AnnotationProcessorPico extends AbstractProcessor
       return false;
 
     Set<TypeElement> annotatedElements = new LinkedHashSet<TypeElement>();
-    for (Element element : roundEnv.getElementsAnnotatedWith(PicoService.class))
-      if (_isValidElement(element))
-        for (Element annotatedElement : roundEnv.getElementsAnnotatedWith((TypeElement) element))
-          annotatedElements.add((TypeElement) annotatedElement);
-
+    for (TypeElement annotation : annotations)
+    {
+      if (annotation.getAnnotation(PicoService.class) != null)
+      {
+        if (_isValidElement(annotation))
+          for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(annotation))
+            annotatedElements.add((TypeElement) annotatedElement);
+      }
+    }
     if (!annotatedElements.isEmpty())
       _generateRegistration(annotatedElements);
     return false;
@@ -55,7 +59,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
 
   private void _generateRegistration(Set<TypeElement> pAnnotatedElements)
   {
-    Set<String> services = new LinkedHashSet<String>();
+    Set<String> serviceSet = new LinkedHashSet<String>();
     Filer filer = processingEnv.getFiler();
     for (TypeElement typeElement : pAnnotatedElements)
     {
@@ -66,12 +70,15 @@ public class AnnotationProcessorPico extends AbstractProcessor
         String pckg = typeElement.getEnclosingElement().toString();
         String fqn = pckg + "." + clsName;
         JavaFileObject sourceFile = filer.createSourceFile(fqn);
-        String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
-        String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date);
-        PrintWriter writer = new PrintWriter(new OutputStreamWriter(sourceFile.openOutputStream(), "UTF-8"));
-        writer.print(content);
-        writer.close();
-        services.add(fqn);
+        if (sourceFile.getLastModified() == 0) // doesn't exist, yet.
+        {
+          String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
+          String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date);
+          PrintWriter writer = new PrintWriter(new OutputStreamWriter(sourceFile.openOutputStream(), "UTF-8"));
+          writer.print(content);
+          writer.close();
+        }
+        serviceSet.add(fqn);
       }
       catch (IOException e)
       {
@@ -85,7 +92,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
       BufferedReader reader = new BufferedReader(new InputStreamReader(serviceFile.openInputStream(), "UTF-8"));
       String line;
       while ((line = reader.readLine()) != null)
-        services.add(line);
+        serviceSet.add(line);
       reader.close();
     }
     catch (FileNotFoundException e)
@@ -94,11 +101,13 @@ public class AnnotationProcessorPico extends AbstractProcessor
     }
     catch (IOException e)
     {
-      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Couldn't load existing services: " + e);
+      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Couldn't load existing serviceSet: " + e);
     }
 
     try
     {
+      List<String> services = new ArrayList<String>(serviceSet);
+      Collections.sort(services);
       FileObject serviceFile = filer.createResource(StandardLocation.CLASS_OUTPUT, "", SERVICE_REGISTRATION_PATH);
       PrintWriter writer = new PrintWriter(new OutputStreamWriter(serviceFile.openOutputStream(), "UTF-8"));
       for (String service : services)
