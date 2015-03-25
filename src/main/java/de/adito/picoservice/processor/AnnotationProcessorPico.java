@@ -35,6 +35,8 @@ public class AnnotationProcessorPico extends AbstractProcessor
       "  '}'\n" +
       "'}'";
   private static final String SERVICE_REGISTRATION_PATH = "META-INF/services/de.adito.picoservice.IPicoRegistration";
+  private static final List<ElementKind> ENCLOSING_TYPES =
+      Arrays.asList(ElementKind.PACKAGE, ElementKind.CLASS, ElementKind.INTERFACE, ElementKind.ENUM);
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
@@ -65,20 +67,17 @@ public class AnnotationProcessorPico extends AbstractProcessor
     {
       try
       {
-        String annotatedClsName = typeElement.getSimpleName().toString();
-        String clsName = annotatedClsName + PICO_POSTFIX;
-        String pckg = typeElement.getEnclosingElement().toString();
-        String fqn = pckg + "." + clsName;
-        JavaFileObject sourceFile = filer.createSourceFile(fqn);
+        _ElementInfo eI = new _ElementInfo(typeElement);
+        JavaFileObject sourceFile = filer.createSourceFile(eI.fqn);
         if (sourceFile.getLastModified() == 0) // doesn't exist, yet.
         {
           String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
-          String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date);
+          String content = MessageFormat.format(REGISTRATION_TEMPLATE, eI.pckg, eI.clsName, eI.annotatedClsName, date);
           PrintWriter writer = new PrintWriter(new OutputStreamWriter(sourceFile.openOutputStream(), "UTF-8"));
           writer.print(content);
           writer.close();
         }
-        serviceSet.add(fqn);
+        serviceSet.add(eI.fqn);
       }
       catch (IOException e)
       {
@@ -147,4 +146,64 @@ public class AnnotationProcessorPico extends AbstractProcessor
     }
     return true;
   }
+
+  /**
+   * Bag for element info.
+   */
+  private class _ElementInfo
+  {
+    String pckg;
+    String annotatedClsName;
+    String clsName;
+    String fqn;
+
+    public _ElementInfo(TypeElement pTypeElement)
+    {
+      pckg = _getPackage(pTypeElement);
+      annotatedClsName = _getAnnotatedClassName(pTypeElement);
+      clsName = annotatedClsName.replaceAll("\\.", "\\$") + PICO_POSTFIX;
+      fqn = pckg + "." + clsName;
+    }
+
+    private String _getPackage(Element pElement)
+    {
+      Element element = pElement;
+      while (element != null)
+      {
+        if (element.getKind() == ElementKind.PACKAGE)
+          return element.toString();
+        Element enclosingElement = element.getEnclosingElement();
+        if (ENCLOSING_TYPES.contains(enclosingElement.getKind()))
+          element = enclosingElement;
+        else
+        {
+          processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Element type not supported", pElement);
+          break;
+        }
+      }
+      return "";
+    }
+
+    private String _getAnnotatedClassName(Element pElement)
+    {
+      String name = "";
+      Element element = pElement;
+      while (element != null && element.getKind() != ElementKind.PACKAGE)
+      {
+        if (!name.isEmpty())
+          name = "." + name;
+        name = element.getSimpleName() + name;
+        Element enclosingElement = element.getEnclosingElement();
+        if (ENCLOSING_TYPES.contains(enclosingElement.getKind()))
+          element = enclosingElement;
+        else
+        {
+          processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Element type not supported", pElement);
+          break;
+        }
+      }
+      return name;
+    }
+  }
+
 }
