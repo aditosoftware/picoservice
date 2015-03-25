@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * @author j.boesl, 23.03.15
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface PicoService
 {
