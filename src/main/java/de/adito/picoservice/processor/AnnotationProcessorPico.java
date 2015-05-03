@@ -4,14 +4,26 @@ import de.adito.picoservice.PicoService;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
-import javax.tools.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
+import javax.tools.FileObject;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 import java.io.*;
-import java.lang.annotation.*;
-import java.text.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
+ * Generates instances of {@link de.adito.picoservice.IPicoRegistration} and the corresponding service entries in the
+ * META-INF directory for classes annotated with annotations that are annotated with {@link de.adito.picoservice.PicoService}.
+ *
  * @author j.boesl, 23.03.15
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
