@@ -6,9 +6,19 @@ Picoservice is a java library for service registration and service lookup. With 
 
 Picoservice is focused on it's main purpose: registration and lookup. For registration you have to annotate a custom annotation with `@PicoService`. Each class annotated with that custom annotation can afterwards be found by using `IPicoRegistry.INSTANCE.find(Class<C> pSearchedType, Class<A> pAnnotationClass)`.
 
+Get started
+------------
+The easiest way to get started with picoservice is using the following snippet in your pom.xml.
+```xml
+<dependency>
+  <groupId>de.adito.picoservice</groupId>
+  <artifactId>picoservice</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
 
-Example of usage:
------------------
+Example of usage
+----------------
 
 Custom annotation which is put on classes for registration:
 ```java
