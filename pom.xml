@@ -21,8 +21,10 @@
 
   <developers>
     <developer>
+      <id>jboesl</id>
       <name>Johannes Boesl</name>
       <email>j.boesl@adito.de</email>
+      <timezone>1</timezone>
       <organization>ADITO Software GmbH</organization>
       <organizationUrl>http://www.adito.de</organizationUrl>
     </developer>
@@ -33,6 +35,11 @@
     <developerConnection>scm:git:git@github.com:jboesl/picoservice.git</developerConnection>
     <url>git@github.com:jboesl/picoservice.git</url>
   </scm>
+
+  <issueManagement>
+    <url>https://github.com/jboesl/picoservice/issues</url>
+    <system>github</system>
+  </issueManagement>
 
   <distributionManagement>
     <snapshotRepository>
