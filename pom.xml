@@ -6,11 +6,11 @@
 
   <groupId>de.adito.picoservice</groupId>
   <artifactId>picoservice</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>A minimalist registry for java services using serviceloader</description>
-  <url>https://github.com/jboesl/picoservice</url>
+  <url>https://github.com/aditosoftware/picoservice</url>
 
   <licenses>
     <license>
@@ -26,18 +26,18 @@
       <email>j.boesl@adito.de</email>
       <timezone>1</timezone>
       <organization>ADITO Software GmbH</organization>
-      <organizationUrl>http://www.adito.de</organizationUrl>
+      <organizationUrl>https://www.adito.de</organizationUrl>
     </developer>
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:jboesl/picoservice.git</connection>
-    <developerConnection>scm:git:git@github.com:jboesl/picoservice.git</developerConnection>
-    <url>git@github.com:jboesl/picoservice.git</url>
+    <connection>scm:git:git@github.com:aditosoftware/picoservice.git</connection>
+    <developerConnection>scm:git:git@github.com:aditosoftware/picoservice.git</developerConnection>
+    <url>git@github.com:aditosoftware/picoservice.git</url>
   </scm>
 
   <issueManagement>
-    <url>https://github.com/jboesl/picoservice/issues</url>
+    <url>https://github.com/aditosoftware/picoservice/issues</url>
     <system>github</system>
   </issueManagement>
 
@@ -77,8 +77,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.2</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.8</source>
+          <target>1.8</target>
           <compilerArgument>-proc:none</compilerArgument>
         </configuration>
         <executions>

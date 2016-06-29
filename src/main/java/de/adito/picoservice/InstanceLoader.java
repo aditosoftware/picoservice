@@ -2,14 +2,13 @@ package de.adito.picoservice;
 
 import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.ServiceLoader;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Default implementation for {@link de.adito.picoservice.IPicoRegistry} available at
- * {@link de.adito.picoservice.IPicoRegistry#INSTANCE}.<br/>
+ * {@link de.adito.picoservice.IPicoRegistry#INSTANCE}.<br>
  * The implementation can be replaced by providing a service for {@link de.adito.picoservice.IPicoRegistry} using
  * java's {@link java.util.ServiceLoader}.
  *
@@ -28,13 +27,14 @@ class InstanceLoader
     // create default
     return new IPicoRegistry()
     {
+      private final ServiceLoader<IPicoRegistration> serviceLoader = ServiceLoader.load(IPicoRegistration.class);
+
       @Nonnull
       @Override
       public <C, A extends Annotation> Map<Class<? extends C>, A> find(@Nonnull Class<C> pSearchedType,
                                                                        @Nonnull Class<A> pAnnotationClass)
       {
-        Map<Class<? extends C>, A> map = new HashMap<Class<? extends C>, A>();
-        ServiceLoader<IPicoRegistration> serviceLoader = ServiceLoader.load(IPicoRegistration.class);
+        Map<Class<? extends C>, A> map = new HashMap<>();
         for (IPicoRegistration registration : serviceLoader)
         {
           Class<?> annotatedClass = registration.getAnnotatedClass();
@@ -48,6 +48,27 @@ class InstanceLoader
         }
         return map;
       }
+
+      @Nonnull
+      @Override
+      public <T, C> Stream<T> find(@Nonnull Class<C> pSearchedType,
+                                   @Nonnull Function<Class<? extends C>, T> pResolverFunction)
+      {
+        Stream.Builder<T> streamBuilder = Stream.builder();
+        for (IPicoRegistration registration : serviceLoader)
+        {
+          Class<?> annotatedClass = registration.getAnnotatedClass();
+          if (pSearchedType.isAssignableFrom(annotatedClass))
+          {
+            @SuppressWarnings("unchecked")
+            T result = pResolverFunction.apply((Class<? extends C>) annotatedClass);
+            if (result != null)
+              streamBuilder.add(result);
+          }
+        }
+        return streamBuilder.build();
+      }
+
     };
   }
 }

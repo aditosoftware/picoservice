@@ -3,6 +3,8 @@ package de.adito.picoservice;
 import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * This interface defines a way to lookup service classes. A default instance can be accessed at
@@ -29,5 +31,17 @@ public interface IPicoRegistry
    */
   @Nonnull
   <C, A extends Annotation> Map<Class<? extends C>, A> find(@Nonnull Class<C> pSearchedType, @Nonnull Class<A> pAnnotationClass);
+
+  /**
+   * Finds all services of given type transformed by given function.
+   *
+   * @param pSearchedType     services of this type are searched.
+   * @param pResolverFunction function for transforming resolved service classes. Returns <tt>nul</tt> to filter a result.
+   * @param <T>               target transformation type.
+   * @param <C>               the searched type.
+   * @return a stream of transformation results.
+   */
+  @Nonnull
+  <T, C> Stream<T> find(@Nonnull Class<C> pSearchedType, @Nonnull Function<Class<? extends C>, T> pResolverFunction);
 
 }

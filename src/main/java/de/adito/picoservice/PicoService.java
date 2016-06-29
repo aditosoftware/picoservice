@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * Marker annotation for service annotations. Every class that is annotated with a service annotation can be found with
- * picoservice.<br/>
+ * picoservice.<br>
  * The registration of the services is done at compile time by {@link de.adito.picoservice.processor.AnnotationProcessorPico}.
  * For lookup {@link de.adito.picoservice.IPicoRegistry} is used. A default implementation is available at
  * {@link de.adito.picoservice.IPicoRegistry#INSTANCE}. Alternatively lookup can be done with java's
