@@ -13,7 +13,7 @@ The easiest way to get started with picoservice is using the following snippet i
 <dependency>
   <groupId>de.adito.picoservice</groupId>
   <artifactId>picoservice</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
 </dependency>
 ```
 
