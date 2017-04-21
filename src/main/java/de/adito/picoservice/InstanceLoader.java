@@ -28,6 +28,7 @@ class InstanceLoader
     return new IPicoRegistry()
     {
       private final ServiceLoader<IPicoRegistration> serviceLoader = ServiceLoader.load(IPicoRegistration.class);
+      private final Collection<IPicoRegistration> loadedServices = _loadServices();
 
       @Nonnull
       @Override
@@ -35,7 +36,7 @@ class InstanceLoader
                                                                        @Nonnull Class<A> pAnnotationClass)
       {
         Map<Class<? extends C>, A> map = new HashMap<>();
-        for (IPicoRegistration registration : serviceLoader)
+        for (IPicoRegistration registration : loadedServices)
         {
           Class<?> annotatedClass = registration.getAnnotatedClass();
           if (pSearchedType.isAssignableFrom(annotatedClass))
@@ -55,7 +56,7 @@ class InstanceLoader
                                    @Nonnull Function<Class<? extends C>, T> pResolverFunction)
       {
         Stream.Builder<T> streamBuilder = Stream.builder();
-        for (IPicoRegistration registration : serviceLoader)
+        for (IPicoRegistration registration : loadedServices)
         {
           Class<?> annotatedClass = registration.getAnnotatedClass();
           if (pSearchedType.isAssignableFrom(annotatedClass))
@@ -69,6 +70,26 @@ class InstanceLoader
         return streamBuilder.build();
       }
 
+      /**
+       * We have to load all of our PicoServices into a separate collection, because
+       * the Java-ServiceLoader throws a ConcurrentModificationException if >1 iterators
+       * are iterated at the same time.
+       * Reloading of cached Registrations is currently not supported yet.
+       *
+       * @see <a href="https://anydoby.com/jblog/en/java/2128">https://anydoby.com/jblog/en/java/2128</a>
+       * @see <a href="https://issues.apache.org/jira/browse/SIS-193">https://issues.apache.org/jira/browse/SIS-193</a>
+       */
+      @Nonnull
+      private Collection<IPicoRegistration> _loadServices()
+      {
+        synchronized (serviceLoader)
+        {
+          HashSet<IPicoRegistration> foundServices = new HashSet<>();
+          for (IPicoRegistration registration : serviceLoader)
+            foundServices.add(registration);
+          return Collections.unmodifiableSet(foundServices);
+        }
+      }
     };
   }
 }
