@@ -4,20 +4,12 @@ import de.adito.picoservice.PicoService;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
-import javax.tools.FileObject;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardLocation;
+import javax.lang.model.element.*;
+import javax.tools.*;
 import java.io.*;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.lang.annotation.*;
+import java.nio.file.*;
+import java.text.*;
 import java.util.*;
 
 /**
@@ -26,7 +18,7 @@ import java.util.*;
  *
  * @author j.boesl, 23.03.15
  */
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes("*")
 public class AnnotationProcessorPico extends AbstractProcessor
 {
@@ -56,7 +48,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
     if (roundEnv.processingOver())
       return false;
 
-    Set<TypeElement> annotatedElements = new LinkedHashSet<TypeElement>();
+    Set<TypeElement> annotatedElements = new LinkedHashSet<>();
     for (TypeElement annotation : annotations)
     {
       if (annotation.getAnnotation(PicoService.class) != null)
@@ -73,22 +65,14 @@ public class AnnotationProcessorPico extends AbstractProcessor
 
   private void _generateRegistration(Set<TypeElement> pAnnotatedElements)
   {
-    Set<String> serviceSet = new LinkedHashSet<String>();
+    Set<String> serviceSet = new LinkedHashSet<>();
     Filer filer = processingEnv.getFiler();
     for (TypeElement typeElement : pAnnotatedElements)
     {
       try
       {
         _ElementInfo eI = new _ElementInfo(typeElement);
-        JavaFileObject sourceFile = filer.createSourceFile(eI.fqn);
-        if (sourceFile.getLastModified() == 0) // doesn't exist, yet.
-        {
-          String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
-          String content = MessageFormat.format(REGISTRATION_TEMPLATE, eI.pckg, eI.clsName, eI.annotatedClsName, date);
-          PrintWriter writer = new PrintWriter(new OutputStreamWriter(sourceFile.openOutputStream(), "UTF-8"));
-          writer.print(content);
-          writer.close();
-        }
+        eI.write(filer);
         serviceSet.add(eI.fqn);
       }
       catch (IOException e)
@@ -100,15 +84,15 @@ public class AnnotationProcessorPico extends AbstractProcessor
     try
     {
       FileObject serviceFile = filer.getResource(StandardLocation.CLASS_OUTPUT, "", SERVICE_REGISTRATION_PATH);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(serviceFile.openInputStream(), "UTF-8"));
-      String line;
-      while ((line = reader.readLine()) != null)
-        serviceSet.add(line);
-      reader.close();
-    }
-    catch (FileNotFoundException e)
-    {
-      // ignore
+      if (Files.isRegularFile(Paths.get(serviceFile.toUri())))
+      {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(serviceFile.openInputStream(), "UTF-8")))
+        {
+          String line;
+          while ((line = reader.readLine()) != null)
+            serviceSet.add(line);
+        }
+      }
     }
     catch (IOException e)
     {
@@ -117,13 +101,14 @@ public class AnnotationProcessorPico extends AbstractProcessor
 
     try
     {
-      List<String> services = new ArrayList<String>(serviceSet);
+      List<String> services = new ArrayList<>(serviceSet);
       Collections.sort(services);
       FileObject serviceFile = filer.createResource(StandardLocation.CLASS_OUTPUT, "", SERVICE_REGISTRATION_PATH);
-      PrintWriter writer = new PrintWriter(new OutputStreamWriter(serviceFile.openOutputStream(), "UTF-8"));
-      for (String service : services)
-        writer.println(service);
-      writer.close();
+      try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(serviceFile.openOutputStream(), "UTF-8")))
+      {
+        for (String service : services)
+          writer.println(service);
+      }
     }
     catch (IOException x)
     {
@@ -140,7 +125,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
       return false;
     }
     Target target = pElement.getAnnotation(Target.class);
-    if (target == null || target.value() == null || target.value().length == 0)
+    if (target == null || target.value().length == 0)
     {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.MANDATORY_WARNING, "Target has to be defined", pElement);
       return false;
@@ -169,12 +154,27 @@ public class AnnotationProcessorPico extends AbstractProcessor
     String clsName;
     String fqn;
 
-    public _ElementInfo(TypeElement pTypeElement)
+    _ElementInfo(TypeElement pTypeElement)
     {
       pckg = _getPackage(pTypeElement);
       annotatedClsName = _getAnnotatedClassName(pTypeElement);
       clsName = annotatedClsName.replaceAll("\\.", "\\$") + PICO_POSTFIX;
       fqn = pckg + "." + clsName;
+    }
+
+    void write(Filer pFiler) throws IOException
+    {
+      FileObject sourceFile = pFiler.getResource(StandardLocation.SOURCE_OUTPUT, pckg, clsName + ".java");
+      Path path = Paths.get(sourceFile.toUri());
+      try (OutputStream outputstream = Files.exists(path) ? Files.newOutputStream(path) : pFiler.createSourceFile(fqn).openOutputStream())
+      {
+        String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
+        String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date);
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputstream, "UTF-8")))
+        {
+          writer.print(content);
+        }
+      }
     }
 
     private String _getPackage(Element pElement)
@@ -198,13 +198,13 @@ public class AnnotationProcessorPico extends AbstractProcessor
 
     private String _getAnnotatedClassName(Element pElement)
     {
-      String name = "";
+      StringBuilder name = new StringBuilder();
       Element element = pElement;
       while (element != null && element.getKind() != ElementKind.PACKAGE)
       {
-        if (!name.isEmpty())
-          name = "." + name;
-        name = element.getSimpleName() + name;
+        if (name.length() > 0)
+          name.insert(0, ".");
+        name.insert(0, element.getSimpleName());
         Element enclosingElement = element.getEnclosingElement();
         if (ENCLOSING_TYPES.contains(enclosingElement.getKind()))
           element = enclosingElement;
@@ -214,7 +214,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
           break;
         }
       }
-      return name;
+      return name.toString();
     }
   }
 
