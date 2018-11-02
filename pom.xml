@@ -77,8 +77,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.2</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>8</source>
+          <target>8</target>
           <compilerArgument>-proc:none</compilerArgument>
         </configuration>
         <executions>
@@ -97,10 +97,11 @@
 
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.5</version>
+        <version>3.1.0</version>
         <configuration>
-          <useDefaultManifestFile>true</useDefaultManifestFile>
           <archive>
+            <index>true</index>
+            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
             <manifest>
               <useUniqueVersions>true</useUniqueVersions>
               <addClasspath>true</addClasspath>
@@ -120,7 +121,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.5.3</version>
+        <version>4.0.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
@@ -180,8 +181,16 @@
             </executions>
           </plugin>
 
+          <!-- JavaDoc-Plugin. -->
           <plugin>
             <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.0.1</version>
+            <configuration>
+              <additionalparam>-Xdoclint:none</additionalparam>
+              <jdkToolchain>
+                <version>9</version>
+              </jdkToolchain>
+            </configuration>
             <executions>
               <execution>
                 <id>attach-javadoc</id>
