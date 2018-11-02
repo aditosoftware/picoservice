@@ -27,7 +27,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
       "\n" +
       "import de.adito.picoservice.IPicoRegistration;\n" +
       "\n" +
-      "import javax.annotation.Generated;\n" +
+      "import {4};\n" +
       "\n" +
       "@Generated(value = \"de.adito.picoservice.processor.AnnotationProcessorPico\", date = \"{3}\")\n" +
       "public class {1} implements IPicoRegistration\n" +
@@ -169,11 +169,24 @@ public class AnnotationProcessorPico extends AbstractProcessor
       try (OutputStream outputstream = Files.exists(path) ? Files.newOutputStream(path) : pFiler.createSourceFile(fqn).openOutputStream())
       {
         String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
-        String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date);
+        String importString = _getJavaVersion() >= 9 ?
+            "javax.annotation.processing.Generated" :
+            "javax.annotation.Generated";
+        String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date, importString);
         try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputstream, "UTF-8")))
         {
           writer.print(content);
         }
+      }
+    }
+
+    private int _getJavaVersion()
+    {
+      try {
+        return Integer.parseInt(System.getProperty("java.specification.version"));
+      }
+      catch (NumberFormatException pE) {
+        return 8;
       }
     }
 
