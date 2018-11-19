@@ -3,6 +3,7 @@ package de.adito.picoservice;
 import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -19,7 +20,7 @@ public class DefaultPicoRegistry implements IPicoRegistry
   protected DefaultPicoRegistry()
   {
     loadedServices = _loadServices();
-    searchedTypeToAnnotatedClassesMap = new HashMap<>();
+    searchedTypeToAnnotatedClassesMap = new ConcurrentHashMap<>();
   }
 
   @Nonnull
