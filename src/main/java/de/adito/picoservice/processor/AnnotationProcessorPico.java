@@ -8,6 +8,7 @@ import javax.lang.model.element.*;
 import javax.tools.*;
 import java.io.*;
 import java.lang.annotation.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.text.*;
 import java.util.*;
@@ -86,7 +87,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
       FileObject serviceFile = filer.getResource(StandardLocation.CLASS_OUTPUT, "", SERVICE_REGISTRATION_PATH);
       if (Files.isRegularFile(Paths.get(serviceFile.toUri())))
       {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(serviceFile.openInputStream(), "UTF-8")))
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(serviceFile.openInputStream(), StandardCharsets.UTF_8)))
         {
           String line;
           while ((line = reader.readLine()) != null)
@@ -104,7 +105,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
       List<String> services = new ArrayList<>(serviceSet);
       Collections.sort(services);
       FileObject serviceFile = filer.createResource(StandardLocation.CLASS_OUTPUT, "", SERVICE_REGISTRATION_PATH);
-      try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(serviceFile.openOutputStream(), "UTF-8")))
+      try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(serviceFile.openOutputStream(), StandardCharsets.UTF_8)))
       {
         for (String service : services)
           writer.println(service);
@@ -165,15 +166,15 @@ public class AnnotationProcessorPico extends AbstractProcessor
     void write(Filer pFiler) throws IOException
     {
       FileObject sourceFile = pFiler.getResource(StandardLocation.SOURCE_OUTPUT, pckg, clsName + ".java");
-      Path path = Paths.get(sourceFile.toUri());
-      try (OutputStream outputstream = Files.exists(path) ? Files.newOutputStream(path) : pFiler.createSourceFile(fqn).openOutputStream())
+      sourceFile.delete();
+      try (OutputStream outputstream = pFiler.createSourceFile(fqn).openOutputStream())
       {
         String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
         String importString = _getJavaVersion() >= 9 ?
             "javax.annotation.processing.Generated" :
             "javax.annotation.Generated";
         String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date, importString);
-        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputstream, "UTF-8")))
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputstream, StandardCharsets.UTF_8)))
         {
           writer.print(content);
         }
