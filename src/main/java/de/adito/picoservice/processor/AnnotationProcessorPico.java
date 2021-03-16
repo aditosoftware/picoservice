@@ -8,8 +8,6 @@ import javax.lang.model.element.*;
 import javax.tools.*;
 import java.io.*;
 import java.lang.annotation.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
 import java.text.*;
 import java.util.*;
 
@@ -84,31 +82,13 @@ public class AnnotationProcessorPico extends AbstractProcessor
 
     try
     {
-      FileObject serviceFile = filer.getResource(StandardLocation.CLASS_OUTPUT, "", SERVICE_REGISTRATION_PATH);
-      if (Files.isRegularFile(Paths.get(serviceFile.toUri())))
-      {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(serviceFile.openInputStream(), StandardCharsets.UTF_8)))
-        {
-          String line;
-          while ((line = reader.readLine()) != null)
-            serviceSet.add(line);
-        }
-      }
-    }
-    catch (IOException e)
-    {
-      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Couldn't load existing serviceSet: " + e);
-    }
-
-    try
-    {
       List<String> services = new ArrayList<>(serviceSet);
       Collections.sort(services);
       FileObject serviceFile = filer.createResource(StandardLocation.CLASS_OUTPUT, "", SERVICE_REGISTRATION_PATH);
-      try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(serviceFile.openOutputStream(), StandardCharsets.UTF_8)))
+      try (Writer writer = serviceFile.openWriter())
       {
         for (String service : services)
-          writer.println(service);
+          writer.append(service).append("\n");
       }
     }
     catch (IOException x)
@@ -150,13 +130,15 @@ public class AnnotationProcessorPico extends AbstractProcessor
    */
   private class _ElementInfo
   {
-    String pckg;
-    String annotatedClsName;
-    String clsName;
-    String fqn;
+    private final TypeElement typeElement;
+    private final String pckg;
+    private final String annotatedClsName;
+    private final String clsName;
+    private final String fqn;
 
     _ElementInfo(TypeElement pTypeElement)
     {
+      typeElement = pTypeElement;
       pckg = _getPackage(pTypeElement);
       annotatedClsName = _getAnnotatedClassName(pTypeElement);
       clsName = annotatedClsName.replaceAll("\\.", "\\$") + PICO_POSTFIX;
@@ -165,19 +147,14 @@ public class AnnotationProcessorPico extends AbstractProcessor
 
     void write(Filer pFiler) throws IOException
     {
-      FileObject sourceFile = pFiler.getResource(StandardLocation.SOURCE_OUTPUT, pckg, clsName + ".java");
-      sourceFile.delete();
-      try (OutputStream outputstream = pFiler.createSourceFile(fqn).openOutputStream())
+      try (Writer writer = pFiler.createSourceFile(fqn, typeElement).openWriter())
       {
         String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
         String importString = _getJavaVersion() >= 9 ?
             "javax.annotation.processing.Generated" :
             "javax.annotation.Generated";
         String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date, importString);
-        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputstream, StandardCharsets.UTF_8)))
-        {
-          writer.print(content);
-        }
+        writer.write(content);
       }
     }
 
