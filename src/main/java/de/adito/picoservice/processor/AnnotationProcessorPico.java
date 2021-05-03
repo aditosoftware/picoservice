@@ -8,6 +8,9 @@ import javax.lang.model.element.*;
 import javax.tools.*;
 import java.io.*;
 import java.lang.annotation.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.*;
 import java.util.*;
 
@@ -41,24 +44,27 @@ public class AnnotationProcessorPico extends AbstractProcessor
   private static final List<ElementKind> ENCLOSING_TYPES =
       Arrays.asList(ElementKind.PACKAGE, ElementKind.CLASS, ElementKind.INTERFACE, ElementKind.ENUM);
 
+  private final Set<TypeElement> annotatedElements = new LinkedHashSet<>();
+
+
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
   {
     if (roundEnv.processingOver())
-      return false;
-
-    Set<TypeElement> annotatedElements = new LinkedHashSet<>();
-    for (TypeElement annotation : annotations)
     {
-      if (annotation.getAnnotation(PicoService.class) != null)
-      {
-        if (_isValidElement(annotation))
-          for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(annotation))
-            annotatedElements.add((TypeElement) annotatedElement);
+      if (!annotatedElements.isEmpty())
+        _generateRegistration(annotatedElements);
+    }
+    else
+    {
+      for (TypeElement annotation : annotations) {
+        if (annotation.getAnnotation(PicoService.class) != null) {
+          if (_isValidElement(annotation))
+            for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(annotation))
+              annotatedElements.add((TypeElement) annotatedElement);
+        }
       }
     }
-    if (!annotatedElements.isEmpty())
-      _generateRegistration(annotatedElements);
     return false;
   }
 
@@ -78,6 +84,24 @@ public class AnnotationProcessorPico extends AbstractProcessor
       {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getLocalizedMessage(), typeElement);
       }
+    }
+
+    try
+    {
+      FileObject serviceFile = filer.getResource(StandardLocation.CLASS_OUTPUT, "", SERVICE_REGISTRATION_PATH);
+      if (Files.isRegularFile(Paths.get(serviceFile.toUri())))
+      {
+        try (BufferedReader reader = new BufferedReader(serviceFile.openReader(true)))
+        {
+          String line;
+          while ((line = reader.readLine()) != null)
+            serviceSet.add(line);
+        }
+      }
+    }
+    catch (IOException e)
+    {
+      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Couldn't load existing serviceSet: " + e);
     }
 
     try
@@ -147,7 +171,9 @@ public class AnnotationProcessorPico extends AbstractProcessor
 
     void write(Filer pFiler) throws IOException
     {
-      try (Writer writer = pFiler.createSourceFile(fqn, typeElement).openWriter())
+      FileObject sourceFile = pFiler.getResource(StandardLocation.SOURCE_OUTPUT, pckg, clsName + ".java");
+      Path path = Paths.get(sourceFile.toUri());
+      try (Writer writer = Files.exists(path) ? Files.newBufferedWriter(path) : pFiler.createSourceFile(fqn, typeElement).openWriter())
       {
         String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
         String importString = _getJavaVersion() >= 9 ?
