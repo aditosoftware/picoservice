@@ -1,6 +1,4 @@
 # picoservice
-[![Build Status](https://travis-ci.org/aditosoftware/picoservice.svg?branch=master)](https://travis-ci.org/aditosoftware/picoservice)
-
 
 Picoservice is a java library for service registration and service lookup. With it, you can find classes that have special meaning in your project. Internally it uses java's `ServiceLoader` so it integrates nicely with you build tools. Nothing magical is happening here.
 
