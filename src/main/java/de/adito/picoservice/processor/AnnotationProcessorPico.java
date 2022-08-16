@@ -200,7 +200,12 @@ public class AnnotationProcessorPico extends AbstractProcessor
       while (element != null)
       {
         if (element.getKind() == ElementKind.PACKAGE)
+        {
+          // fix for https://github.com/aditosoftware/picoservice/issues/3
+          if (element instanceof QualifiedNameable)
+            return ((QualifiedNameable)element).getQualifiedName().toString();
           return element.toString();
+        }
         Element enclosingElement = element.getEnclosingElement();
         if (ENCLOSING_TYPES.contains(enclosingElement.getKind()))
           element = enclosingElement;
