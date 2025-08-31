@@ -1,0 +1,5 @@
+# git automatic conversion settings for project files
+
+*               text=auto
+*.bat	          text eol=crlf
+*.sh		        text eol=lf

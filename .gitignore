@@ -1,6 +1,9 @@
-# IntelliJ IDEA files
-/.idea
+# exclude hidden directories
+/.*/*
+
+# idea
 *.iml
+!/.idea/codeStyles/
 
 # maven
-/target
+**/target/
