@@ -8,9 +8,7 @@ import javax.lang.model.element.*;
 import javax.tools.*;
 import java.io.*;
 import java.lang.annotation.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.text.*;
 import java.util.*;
 
@@ -20,7 +18,6 @@ import java.util.*;
  *
  * @author j.boesl, 23.03.15
  */
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes("*")
 public class AnnotationProcessorPico extends AbstractProcessor
 {
@@ -44,27 +41,28 @@ public class AnnotationProcessorPico extends AbstractProcessor
   private static final List<ElementKind> ENCLOSING_TYPES =
       Arrays.asList(ElementKind.PACKAGE, ElementKind.CLASS, ElementKind.INTERFACE, ElementKind.ENUM);
 
-  private final Set<TypeElement> annotatedElements = new LinkedHashSet<>();
+  private final Set<TypeElement> processedElements = new HashSet<>();
 
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
   {
-    if (roundEnv.processingOver())
+    Set<TypeElement> annotatedElements = new LinkedHashSet<>();
+    for (TypeElement annotation : annotations)
     {
-      if (!annotatedElements.isEmpty())
-        _generateRegistration(annotatedElements);
-    }
-    else
-    {
-      for (TypeElement annotation : annotations) {
-        if (annotation.getAnnotation(PicoService.class) != null) {
-          if (_isValidElement(annotation))
-            for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(annotation))
+      if (annotation.getAnnotation(PicoService.class) != null)
+      {
+        if (_isValidElement(annotation))
+          for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(annotation))
+          {
+            if (processedElements.add((TypeElement) annotatedElement))
               annotatedElements.add((TypeElement) annotatedElement);
-        }
+          }
       }
     }
+    if (!annotatedElements.isEmpty())
+      _generateRegistration(annotatedElements);
+
     return false;
   }
 
@@ -186,10 +184,12 @@ public class AnnotationProcessorPico extends AbstractProcessor
 
     private int _getJavaVersion()
     {
-      try {
+      try
+      {
         return Integer.parseInt(System.getProperty("java.specification.version"));
       }
-      catch (NumberFormatException pE) {
+      catch (NumberFormatException pE)
+      {
         return 8;
       }
     }
@@ -203,7 +203,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
         {
           // fix for https://github.com/aditosoftware/picoservice/issues/3
           if (element instanceof QualifiedNameable)
-            return ((QualifiedNameable)element).getQualifiedName().toString();
+            return ((QualifiedNameable) element).getQualifiedName().toString();
           return element.toString();
         }
         Element enclosingElement = element.getEnclosingElement();
@@ -238,6 +238,13 @@ public class AnnotationProcessorPico extends AbstractProcessor
       }
       return name.toString();
     }
+  }
+
+
+  @Override
+  public SourceVersion getSupportedSourceVersion()
+  {
+    return SourceVersion.latestSupported();
   }
 
 }
