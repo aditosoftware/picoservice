@@ -10,6 +10,8 @@ import java.io.*;
 import java.lang.annotation.*;
 import java.nio.file.*;
 import java.text.*;
+import java.time.*;
+import java.time.format.*;
 import java.util.*;
 
 /**
@@ -151,8 +153,10 @@ public class AnnotationProcessorPico extends AbstractProcessor
   /**
    * Bag for element info.
    */
-  private class _ElementInfo
+  private static class _ElementInfo
   {
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmZ");
+
     private final TypeElement typeElement;
     private final String pckg;
     private final String annotatedClsName;
@@ -175,7 +179,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
     {
       try (Writer writer = pFiler.createSourceFile(fqn, typeElement).openWriter())
       {
-        String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
+        String date = OffsetDateTime.now(ZoneOffset.UTC).format(DATE_FORMATTER);
         String importString = _getJavaVersion() >= 9 ?
             "javax.annotation.processing.Generated" :
             "javax.annotation.Generated";
