@@ -75,7 +75,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
     {
       try
       {
-        _ElementInfo eI = new _ElementInfo(typeElement);
+        _ElementInfo eI = new _ElementInfo(typeElement, processingEnv.getMessager());
         eI.write(filer);
         serviceSet.add(eI.fqn);
       }
@@ -158,10 +158,13 @@ public class AnnotationProcessorPico extends AbstractProcessor
     private final String annotatedClsName;
     private final String clsName;
     private final String fqn;
+    private final Messager processingEnvMessager;
 
-    _ElementInfo(TypeElement pTypeElement)
+    _ElementInfo(TypeElement pTypeElement, Messager pProcessingEnvMessager)
     {
       typeElement = pTypeElement;
+      processingEnvMessager = Objects.requireNonNull(pProcessingEnvMessager);
+
       pckg = _getPackage(pTypeElement);
       annotatedClsName = _getAnnotatedClassName(pTypeElement);
       clsName = annotatedClsName.replaceAll("\\.", "\\$") + PICO_POSTFIX;
@@ -210,7 +213,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
           element = enclosingElement;
         else
         {
-          processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Element type not supported", pElement);
+          processingEnvMessager.printMessage(Diagnostic.Kind.ERROR, "Element type not supported", pElement);
           break;
         }
       }
@@ -231,7 +234,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
           element = enclosingElement;
         else
         {
-          processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Element type not supported", pElement);
+          processingEnvMessager.printMessage(Diagnostic.Kind.ERROR, "Element type not supported", pElement);
           break;
         }
       }
