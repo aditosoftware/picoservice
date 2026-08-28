@@ -22,13 +22,14 @@ import java.util.*;
 public class AnnotationProcessorPico extends AbstractProcessor
 {
   private static final String PICO_POSTFIX = "PicoService";
+  private static final String CLASS_HASH = String.valueOf(AnnotationProcessorPico.class.hashCode());
   private static final String REGISTRATION_TEMPLATE = "package {0};\n" +
       "\n" +
       "import de.adito.picoservice.IPicoRegistration;\n" +
       "\n" +
       "import {4};\n" +
       "\n" +
-      "@Generated(value = \"de.adito.picoservice.processor.AnnotationProcessorPico\", date = \"{3}\")\n" +
+      "@Generated(value = \"de.adito.picoservice.processor.AnnotationProcessorPico\", date = \"{3}\", comments = \"hash:" + CLASS_HASH + "\")\n" +
       "public class {1} implements IPicoRegistration\n" +
       "'{'\n" +
       "  @Override\n" +
