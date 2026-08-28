@@ -170,9 +170,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
 
     void write(Filer pFiler) throws IOException
     {
-      FileObject sourceFile = pFiler.getResource(StandardLocation.SOURCE_OUTPUT, pckg, clsName + ".java");
-      Path path = Paths.get(sourceFile.toUri());
-      try (Writer writer = Files.exists(path) ? Files.newBufferedWriter(path) : pFiler.createSourceFile(fqn, typeElement).openWriter())
+      try (Writer writer = pFiler.createSourceFile(fqn, typeElement).openWriter())
       {
         String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date());
         String importString = _getJavaVersion() >= 9 ?
