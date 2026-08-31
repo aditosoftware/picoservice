@@ -5,6 +5,7 @@ import de.adito.picoservice.PicoService;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.lang.model.util.Elements;
 import javax.tools.*;
 import java.io.*;
 import java.lang.annotation.*;
@@ -77,7 +78,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
     {
       try
       {
-        _ElementInfo eI = new _ElementInfo(typeElement, processingEnv.getMessager());
+        _ElementInfo eI = new _ElementInfo(typeElement, processingEnv.getMessager(), processingEnv.getElementUtils());
         eI.write(filer);
         serviceSet.add(eI.fqn);
       }
@@ -160,17 +161,19 @@ public class AnnotationProcessorPico extends AbstractProcessor
     private final TypeElement typeElement;
     private final String pckg;
     private final String annotatedClsName;
+    private final Elements elementUtils;
     private final String clsName;
     private final String fqn;
     private final Messager processingEnvMessager;
 
-    _ElementInfo(TypeElement pTypeElement, Messager pProcessingEnvMessager)
+    _ElementInfo(TypeElement pTypeElement, Messager pProcessingEnvMessager, Elements pElementUtils)
     {
       typeElement = pTypeElement;
       processingEnvMessager = Objects.requireNonNull(pProcessingEnvMessager);
 
       pckg = _getPackage(pTypeElement);
       annotatedClsName = _getAnnotatedClassName(pTypeElement);
+      elementUtils = Objects.requireNonNull(pElementUtils);
       clsName = annotatedClsName.replaceAll("\\.", "\\$") + PICO_POSTFIX;
       fqn = pckg + "." + clsName;
     }
@@ -180,24 +183,19 @@ public class AnnotationProcessorPico extends AbstractProcessor
       try (Writer writer = pFiler.createSourceFile(fqn, typeElement).openWriter())
       {
         String date = OffsetDateTime.now(ZoneOffset.UTC).format(DATE_FORMATTER);
-        String importString = _getJavaVersion() >= 9 ?
-            "javax.annotation.processing.Generated" :
-            "javax.annotation.Generated";
+        String importString = _getGeneratedAnnotationImport();
         String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date, importString);
         writer.write(content);
       }
     }
 
-    private int _getJavaVersion()
+    private String _getGeneratedAnnotationImport()
     {
-      try
-      {
-        return Integer.parseInt(System.getProperty("java.specification.version"));
-      }
-      catch (NumberFormatException pE)
-      {
-        return 8;
-      }
+      if (elementUtils.getTypeElement("javax.annotation.processing.Generated") != null)
+        return "javax.annotation.processing.Generated";
+      if (elementUtils.getTypeElement("javax.annotation.Generated") != null)
+        return "javax.annotation.Generated";
+      throw new IllegalStateException("Neither javax.annotation.processing.Generated nor javax.annotation.Generated is available");
     }
 
     private String _getPackage(Element pElement)

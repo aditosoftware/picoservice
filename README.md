@@ -5,15 +5,51 @@ Picoservice is a java library for service registration and service lookup. With 
 Picoservice is focused on its main purpose: registration and lookup. For registration, you have to annotate a custom annotation with `@PicoService`. Each class annotated with that custom annotation can afterwards be found by using `IPicoRegistry.INSTANCE.find(Class<C> pSearchedType, Class<A> pAnnotationClass)`.
 
 Get started
-------------
-The easiest way to get started with picoservice is using the following snippet in your pom.xml.
+-----------
+
+Picoservice 2 separates the runtime library from its annotation processor. Applications need
+`picoservice-core` at compile time and runtime. Builds additionally configure
+`picoservice-processor` as an annotation processor; it is not a runtime dependency.
+
 ```xml
 <dependency>
   <groupId>de.adito.picoservice</groupId>
-  <artifactId>picoservice</artifactId>
-  <version>1.1.7</version>
+  <artifactId>picoservice-core</artifactId>
+  <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
+
+Configure the processor with the Maven Compiler Plugin:
+
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>3.13.0</version>
+      <configuration>
+        <proc>full</proc>
+        <annotationProcessorPaths>
+          <path>
+            <groupId>de.adito.picoservice</groupId>
+            <artifactId>picoservice-processor</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+          </path>
+        </annotationProcessorPaths>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+```
+
+Migrating from 1.x
+------------------
+
+Replace the former `de.adito.picoservice:picoservice` dependency with
+`de.adito.picoservice:picoservice-core` and add the compiler-plugin configuration above. The
+Java packages and APIs remain the same; the required change is Maven dependency and processor
+configuration. Do not add `picoservice-processor` as a normal application dependency: it is only
+needed while compiling.
 
 Example of usage
 ----------------
