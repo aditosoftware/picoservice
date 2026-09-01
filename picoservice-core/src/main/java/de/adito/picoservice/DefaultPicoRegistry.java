@@ -29,7 +29,8 @@ public class DefaultPicoRegistry implements IPicoRegistry
                                                                    @Nonnull Class<A> pAnnotationClass)
   {
     Map<Class<? extends C>, A> map = new HashMap<>();
-    for (Class<? extends C> cls : _getSearchedTypes(pSearchedType)) {
+    for (Class<? extends C> cls : _getSearchedTypes(pSearchedType))
+    {
       A annotation = cls.getAnnotation(pAnnotationClass);
       if (annotation != null)
         map.put(cls, annotation);
@@ -53,7 +54,8 @@ public class DefaultPicoRegistry implements IPicoRegistry
   {
     return (Collection) searchedTypeToAnnotatedClassesMap.computeIfAbsent(pSearchedType, searchedType -> {
       ArrayList<Class<? extends T>> st = new ArrayList<>();
-      for (IPicoRegistration registration : loadedServices) {
+      for (IPicoRegistration registration : loadedServices)
+      {
         Class<?> annotatedClass = registration.getAnnotatedClass();
         if (searchedType.isAssignableFrom(annotatedClass))
           st.add((Class<? extends T>) annotatedClass);

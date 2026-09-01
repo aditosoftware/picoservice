@@ -7,21 +7,22 @@ package de.adito.picoservice.test;
 public class TestAnnotated1 implements ITestAnnotated
 {
 
+  @TestAnno(4)
+  public enum InnerTest2
+  {
+  }
+
   public interface InnerInterface
   {
     public enum InnerEnum
     {
       ;
+
       @TestAnno(3)
       public enum InnerTest1 implements ITestAnnotated
       {
       }
     }
-  }
-
-  @TestAnno(4)
-  public enum InnerTest2
-  {
   }
 
 }

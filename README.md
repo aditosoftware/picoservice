@@ -1,8 +1,11 @@
 # picoservice
 
-Picoservice is a java library for service registration and service lookup. With it, you can find classes that have special meaning in your project. Internally it uses java's `ServiceLoader` so it integrates nicely with you build tools. Nothing magical is happening here.
+Picoservice is a java library for service registration and service lookup. With it, you can find classes that have special meaning in your project.
+Internally it uses java's `ServiceLoader` so it integrates nicely with you build tools. Nothing magical is happening here.
 
-Picoservice is focused on its main purpose: registration and lookup. For registration, you have to annotate a custom annotation with `@PicoService`. Each class annotated with that custom annotation can afterwards be found by using `IPicoRegistry.INSTANCE.find(Class<C> pSearchedType, Class<A> pAnnotationClass)`.
+Picoservice is focused on its main purpose: registration and lookup. For registration, you have to annotate a custom annotation with `@PicoService`.
+Each class annotated with that custom annotation can afterwards be found by using
+`IPicoRegistry.INSTANCE.find(Class<C> pSearchedType, Class<A> pAnnotationClass)`.
 
 Get started
 -----------
@@ -19,7 +22,11 @@ Picoservice 2 separates the runtime library from its annotation processor. Appli
 </dependency>
 ```
 
-Configure the processor with the Maven Compiler Plugin:
+### Configure the annotation processor
+
+For Maven 3.x, configure the processor explicitly with the Maven Compiler Plugin. This is the
+[recommended approach](https://maven.apache.org/components/plugins/maven-compiler-plugin-4.x/examples/annotation-processor.html)
+because it limits compilation to the processors that the build declares:
 
 ```xml
 <build>
@@ -42,19 +49,52 @@ Configure the processor with the Maven Compiler Plugin:
 </build>
 ```
 
+### Auto-discovery
+
+`picoservice-processor` also supports Java's standard annotation-processor auto-discovery.
+Add it to the compile class path with `provided` scope and enable annotation processing:
+
+```xml
+<dependency>
+  <groupId>de.adito.picoservice</groupId>
+  <artifactId>picoservice-processor</artifactId>
+  <version>2.0.0-SNAPSHOT</version>
+  <scope>provided</scope>
+</dependency>
+
+<build>
+  <plugins>
+    <plugin>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>3.13.0</version>
+      <configuration>
+        <proc>full</proc>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+```
+
+This lets `javac` find Picoservice and any other processors already on the compile class path.
+It is convenient for existing projects, but explicit processor configuration is preferred: auto-discovery
+can run processors introduced unintentionally by a dependency. Since JDK 23, annotation processing must
+be enabled explicitly; see the [javac documentation](https://docs.oracle.com/en/java/javase/25/docs/specs/man/javac.html).
+
 Migrating from 1.x
 ------------------
 
 Replace the former `de.adito.picoservice:picoservice` dependency with
-`de.adito.picoservice:picoservice-core` and add the compiler-plugin configuration above. The
-Java packages and APIs remain the same; the required change is Maven dependency and processor
-configuration. Do not add `picoservice-processor` as a normal application dependency: it is only
-needed while compiling.
+`de.adito.picoservice:picoservice-core` and configure the processor using the
+[explicit configuration](#configure-the-annotation-processor) above, or use
+[auto-discovery](#auto-discovery) when appropriate. The Java packages and APIs remain the same; the
+required change is Maven dependency and processor configuration. Do not add
+`picoservice-processor` as a normal application dependency: it is only needed while compiling.
 
 Example of usage
 ----------------
 
 Custom annotation which is put on classes for registration:
+
 ```java
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -66,6 +106,7 @@ public @interface TestAnno
 ```
 
 Annotated class 1:
+
 ```java
 @TestAnno(10)
 public class TestAnnotated
@@ -74,6 +115,7 @@ public class TestAnnotated
 ```
 
 Annotated class 2:
+
 ```java
 @TestAnno(20)
 public class TestAnnotated2
@@ -82,6 +124,7 @@ public class TestAnnotated2
 ```
 
 Find those classes:
+
 ```java
 public class Test
 {

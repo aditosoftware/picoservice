@@ -10,9 +10,9 @@ import javax.tools.*;
 import java.io.*;
 import java.lang.annotation.*;
 import java.nio.file.*;
-import java.text.*;
+import java.text.MessageFormat;
 import java.time.*;
-import java.time.format.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -103,7 +103,9 @@ public class AnnotationProcessorPico extends AbstractProcessor
     }
     catch (IOException e)
     {
-      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Couldn't load existing serviceSet: " + e);
+      StringWriter exceptionDetails = new StringWriter();
+      e.printStackTrace(new PrintWriter(exceptionDetails));
+      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Could not load existing serviceSet:\n" + exceptionDetails);
     }
 
     try
@@ -149,6 +151,12 @@ public class AnnotationProcessorPico extends AbstractProcessor
       }
     }
     return true;
+  }
+
+  @Override
+  public SourceVersion getSupportedSourceVersion()
+  {
+    return SourceVersion.latestSupported();
   }
 
   /**
@@ -242,13 +250,6 @@ public class AnnotationProcessorPico extends AbstractProcessor
       }
       return name.toString();
     }
-  }
-
-
-  @Override
-  public SourceVersion getSupportedSourceVersion()
-  {
-    return SourceVersion.latestSupported();
   }
 
 }
