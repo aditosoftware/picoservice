@@ -22,7 +22,7 @@ should prefer the separate modules and explicit processor configuration below.
 <dependency>
   <groupId>de.adito.picoservice</groupId>
   <artifactId>picoservice-core</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ in the build as shown in [auto-discovery](#auto-discovery):
 <dependency>
   <groupId>de.adito.picoservice</groupId>
   <artifactId>picoservice</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
@@ -57,7 +57,7 @@ because it limits compilation to the processors that the build declares:
           <path>
             <groupId>de.adito.picoservice</groupId>
             <artifactId>picoservice-processor</artifactId>
-            <version>2.0.0-SNAPSHOT</version>
+            <version>1.2.0</version>
           </path>
         </annotationProcessorPaths>
       </configuration>
@@ -75,7 +75,7 @@ Add it to the compile class path with `provided` scope and enable annotation pro
 <dependency>
   <groupId>de.adito.picoservice</groupId>
   <artifactId>picoservice-processor</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>1.2.0</version>
   <scope>provided</scope>
 </dependency>
 
