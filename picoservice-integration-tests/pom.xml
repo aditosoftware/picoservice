@@ -22,12 +22,13 @@
       <groupId>de.adito.picoservice</groupId>
       <artifactId>picoservice-core</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>de.adito.picoservice</groupId>
       <artifactId>picoservice-processor</artifactId>
       <version>${project.version}</version>
-      <scope>test</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
