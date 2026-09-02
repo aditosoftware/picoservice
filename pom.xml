@@ -16,6 +16,8 @@
   <modules>
     <module>picoservice-core</module>
     <module>picoservice-processor</module>
+    <!--  picoservice is a compatibility module that contains core and processor like the 1.x.x-version of picoservices  -->
+    <module>picoservice</module>
     <module>picoservice-integration-tests</module>
   </modules>
 

@@ -14,10 +14,27 @@ Picoservice 2 separates the runtime library from its annotation processor. Appli
 `picoservice-core` at compile time and runtime. Builds additionally configure
 `picoservice-processor` as an annotation processor; it is not a runtime dependency.
 
+For compatibility with the 1.x single-artifact setup, `picoservice` is also available. It bundles
+both modules and retains the annotation processor's standard auto-discovery. New applications
+should prefer the separate modules and explicit processor configuration below.
+
 ```xml
 <dependency>
   <groupId>de.adito.picoservice</groupId>
   <artifactId>picoservice-core</artifactId>
+  <version>2.0.0-SNAPSHOT</version>
+</dependency>
+```
+
+### Compatibility artifact
+
+Existing applications can continue to use the original artifact name. Enable annotation processing
+in the build as shown in [auto-discovery](#auto-discovery):
+
+```xml
+<dependency>
+  <groupId>de.adito.picoservice</groupId>
+  <artifactId>picoservice</artifactId>
   <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -83,12 +100,12 @@ be enabled explicitly; see the [javac documentation](https://docs.oracle.com/en/
 Migrating from 1.x
 ------------------
 
-Replace the former `de.adito.picoservice:picoservice` dependency with
-`de.adito.picoservice:picoservice-core` and configure the processor using the
-[explicit configuration](#configure-the-annotation-processor) above, or use
-[auto-discovery](#auto-discovery) when appropriate. The Java packages and APIs remain the same; the
-required change is Maven dependency and processor configuration. Do not add
-`picoservice-processor` as a normal application dependency: it is only needed while compiling.
+The `de.adito.picoservice:picoservice` dependency continues to work through the compatibility
+artifact; enable annotation processing as described in [auto-discovery](#auto-discovery). To migrate
+to the split setup, replace it with `de.adito.picoservice:picoservice-core` and configure the
+processor using the [explicit configuration](#configure-the-annotation-processor) above. The Java
+packages and APIs remain the same. Do not add `picoservice-processor` as a normal application
+dependency: it is only needed while compiling.
 
 Example of usage
 ----------------
