@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>de.adito.picoservice</groupId>
     <artifactId>picoservice-parent</artifactId>
     <version>${revision}</version>
   </parent>
+
   <artifactId>picoservice-integration-tests</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
+
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
+
   <dependencies>
     <dependency>
       <groupId>de.adito.picoservice</groupId>
@@ -30,13 +36,15 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
+          <!-- testing the autodiscovery rather than explicit annotation-processor configuration here -->
           <proc>full</proc>
-          <!-- We want to test the autodiscovery instead of the recommended, explicit annotationProcessor-configuration here  -->
         </configuration>
       </plugin>
     </plugins>
