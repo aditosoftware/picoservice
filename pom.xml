@@ -223,21 +223,5 @@
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>snapshot</id>
-      <distributionManagement>
-        <repository>
-          <id>adito.m2</id>
-          <name>releases</name>
-          <url>${repository.releases}</url>
-        </repository>
-        <snapshotRepository>
-          <id>adito.m2</id>
-          <name>snapshots</name>
-          <url>${repository.snapshots}</url>
-          <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-      </distributionManagement>
-    </profile>
   </profiles>
 </project>
