@@ -49,6 +49,7 @@
             <configuration>
               <!-- testing the autodiscovery rather than explicit annotation-processor configuration here -->
               <proc>full</proc>
+              <release>25</release>
             </configuration>
           </execution>
         </executions>

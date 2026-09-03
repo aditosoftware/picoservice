@@ -41,9 +41,6 @@ public class AnnotationProcessorPico extends AbstractProcessor
       "  '}'\n" +
       "'}'";
   private static final String SERVICE_REGISTRATION_PATH = "META-INF/services/de.adito.picoservice.IPicoRegistration";
-  private static final List<ElementKind> ENCLOSING_TYPES =
-      Arrays.asList(ElementKind.PACKAGE, ElementKind.CLASS, ElementKind.INTERFACE, ElementKind.ENUM);
-
   private final Set<TypeElement> processedElements = new HashSet<>();
 
 
@@ -141,6 +138,16 @@ public class AnnotationProcessorPico extends AbstractProcessor
     return null;
   }
 
+  private static boolean _isSupportedEnclosingElement(Element pElement)
+  {
+    // The semantic ElementKind predicates keep this Java 8-compiled processor forward compatible:
+    // isClass() covers classes, enums and records, while
+    // isInterface() also covers annotation types
+    // Executable and local contexts remain unsupported because generated top-level classes cannot reference them
+    ElementKind kind = pElement.getKind();
+    return kind == ElementKind.PACKAGE || kind.isClass() || kind.isInterface();
+  }
+
   private boolean _isValidElement(Element pElement)
   {
     Retention retention = pElement.getAnnotation(Retention.class);
@@ -224,7 +231,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
           return element.toString();
         }
         Element enclosingElement = element.getEnclosingElement();
-        if (ENCLOSING_TYPES.contains(enclosingElement.getKind()))
+        if (_isSupportedEnclosingElement(enclosingElement))
           element = enclosingElement;
         else
         {
@@ -245,7 +252,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
           name.insert(0, ".");
         name.insert(0, element.getSimpleName());
         Element enclosingElement = element.getEnclosingElement();
-        if (ENCLOSING_TYPES.contains(enclosingElement.getKind()))
+        if (_isSupportedEnclosingElement(enclosingElement))
           element = enclosingElement;
         else
         {

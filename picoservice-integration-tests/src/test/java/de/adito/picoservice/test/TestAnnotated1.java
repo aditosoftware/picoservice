@@ -7,8 +7,8 @@ package de.adito.picoservice.test;
 public class TestAnnotated1 implements ITestAnnotated
 {
 
-  @TestAnno(4)
-  public enum InnerTest2
+  @TestAnno(3)
+  public enum InnerTest2 implements ITestAnnotated
   {
   }
 
@@ -18,7 +18,7 @@ public class TestAnnotated1 implements ITestAnnotated
     {
       ;
 
-      @TestAnno(3)
+      @TestAnno(4)
       public enum InnerTest1 implements ITestAnnotated
       {
       }
