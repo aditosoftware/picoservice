@@ -5,7 +5,6 @@ import de.adito.picoservice.PicoService;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
-import javax.lang.model.util.Elements;
 import javax.tools.*;
 import java.io.*;
 import java.lang.annotation.*;
@@ -32,7 +31,7 @@ public class AnnotationProcessorPico extends AbstractProcessor
       "\n" +
       "import {4};\n" +
       "\n" +
-      "@Generated(value = \"de.adito.picoservice.processor.AnnotationProcessorPico\", date = \"{3}\", comments = \"hash:" + CLASS_HASH + "\")\n" +
+      "@Generated(value = \"de.adito.picoservice.processor.AnnotationProcessorPico\", date = \"{3}\", comments = \"hash:{5}\")\n" +
       "public class {1} implements IPicoRegistration\n" +
       "'{'\n" +
       "  @Override\n" +
@@ -72,14 +71,19 @@ public class AnnotationProcessorPico extends AbstractProcessor
 
   private void _generateRegistration(Set<TypeElement> pAnnotatedElements)
   {
+    // abort early if the required @Generated annotation is unavailable, as registration classes cannot be created without it
+    String generatedAnnotationImport = _getGeneratedAnnotationImport();
+    if (generatedAnnotationImport == null)
+      return;
+
     Set<String> serviceSet = new LinkedHashSet<>();
     Filer filer = processingEnv.getFiler();
     for (TypeElement typeElement : pAnnotatedElements)
     {
       try
       {
-        _ElementInfo eI = new _ElementInfo(typeElement, processingEnv.getMessager(), processingEnv.getElementUtils());
-        eI.write(filer);
+        _ElementInfo eI = new _ElementInfo(typeElement, processingEnv.getMessager());
+        eI.write(filer, generatedAnnotationImport);
         serviceSet.add(eI.fqn);
       }
       catch (IOException e)
@@ -123,6 +127,18 @@ public class AnnotationProcessorPico extends AbstractProcessor
     {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to write service definition files: " + x);
     }
+  }
+
+  private String _getGeneratedAnnotationImport()
+  {
+    if (processingEnv.getElementUtils().getTypeElement("javax.annotation.processing.Generated") != null)
+      return "javax.annotation.processing.Generated";
+    if (processingEnv.getElementUtils().getTypeElement("javax.annotation.Generated") != null)
+      return "javax.annotation.Generated";
+
+    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+        "Cannot generate pico registrations: neither javax.annotation.processing.Generated nor javax.annotation.Generated is available");
+    return null;
   }
 
   private boolean _isValidElement(Element pElement)
@@ -169,41 +185,30 @@ public class AnnotationProcessorPico extends AbstractProcessor
     private final TypeElement typeElement;
     private final String pckg;
     private final String annotatedClsName;
-    private final Elements elementUtils;
     private final String clsName;
     private final String fqn;
     private final Messager processingEnvMessager;
 
-    _ElementInfo(TypeElement pTypeElement, Messager pProcessingEnvMessager, Elements pElementUtils)
+    _ElementInfo(TypeElement pTypeElement, Messager pProcessingEnvMessager)
     {
       typeElement = pTypeElement;
       processingEnvMessager = Objects.requireNonNull(pProcessingEnvMessager);
 
       pckg = _getPackage(pTypeElement);
       annotatedClsName = _getAnnotatedClassName(pTypeElement);
-      elementUtils = Objects.requireNonNull(pElementUtils);
       clsName = annotatedClsName.replaceAll("\\.", "\\$") + PICO_POSTFIX;
       fqn = pckg + "." + clsName;
     }
 
-    void write(Filer pFiler) throws IOException
+    void write(Filer pFiler, String pGeneratedAnnotationImport) throws IOException
     {
       try (Writer writer = pFiler.createSourceFile(fqn, typeElement).openWriter())
       {
+        // dynamic build values (date and hash) are intentionally included for human identification purposes
         String date = OffsetDateTime.now(ZoneOffset.UTC).format(DATE_FORMATTER);
-        String importString = _getGeneratedAnnotationImport();
-        String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date, importString);
+        String content = MessageFormat.format(REGISTRATION_TEMPLATE, pckg, clsName, annotatedClsName, date, pGeneratedAnnotationImport, CLASS_HASH);
         writer.write(content);
       }
-    }
-
-    private String _getGeneratedAnnotationImport()
-    {
-      if (elementUtils.getTypeElement("javax.annotation.processing.Generated") != null)
-        return "javax.annotation.processing.Generated";
-      if (elementUtils.getTypeElement("javax.annotation.Generated") != null)
-        return "javax.annotation.Generated";
-      throw new IllegalStateException("Neither javax.annotation.processing.Generated nor javax.annotation.Generated is available");
     }
 
     private String _getPackage(Element pElement)
