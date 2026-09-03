@@ -7,16 +7,13 @@ Picoservice is focused on its main purpose: registration and lookup. For registr
 Each class annotated with that custom annotation can afterwards be found by using
 `IPicoRegistry.INSTANCE.find(Class<C> pSearchedType, Class<A> pAnnotationClass)`.
 
-Get started
------------
+## Get started
 
-Picoservice 2 separates the runtime library from its annotation processor. Applications need
-`picoservice-core` at compile time and runtime. Builds additionally configure
-`picoservice-processor` as an annotation processor; it is not a runtime dependency.
+As of version 1.2.0 of the Picoservice the runtime library is separated from its annotation processor. Applications need `picoservice-core` at compile time and runtime. 
+Builds additionally configure `picoservice-processor` as an annotation processor; it is not a runtime dependency.
 
-For compatibility with the 1.x single-artifact setup, `picoservice` is also available. It bundles
-both modules and retains the annotation processor's standard auto-discovery. New applications
-should prefer the separate modules and explicit processor configuration below.
+For compatibility reasons, a single-artifact setup `picoservice` is also available. It bundles both modules and retains the annotation processor's standard auto-discovery. 
+New applications should prefer the separate modules and explicit processor configuration below.
 
 ```xml
 <dependency>
@@ -83,7 +80,7 @@ Add it to the compile class path with `provided` scope and enable annotation pro
   <plugins>
     <plugin>
       <artifactId>maven-compiler-plugin</artifactId>
-      <version>3.13.0</version>
+      <version>3.16.0</version>
       <configuration>
         <proc>full</proc>
       </configuration>
@@ -94,21 +91,11 @@ Add it to the compile class path with `provided` scope and enable annotation pro
 
 This lets `javac` find Picoservice and any other processors already on the compile class path.
 It is convenient for existing projects, but explicit processor configuration is preferred: auto-discovery
-can run processors introduced unintentionally by a dependency. Since JDK 23, annotation processing must
-be enabled explicitly; see the [javac documentation](https://docs.oracle.com/en/java/javase/25/docs/specs/man/javac.html).
+can run processors introduced unintentionally by a dependency. 
 
-Migrating from 1.x
-------------------
+Since JDK 23, annotation processing must be enabled explicitly; see he [javac documentation](https://docs.oracle.com/en/java/javase/25/docs/specs/man/javac.html).
 
-The `de.adito.picoservice:picoservice` dependency continues to work through the compatibility
-artifact; enable annotation processing as described in [auto-discovery](#auto-discovery). To migrate
-to the split setup, replace it with `de.adito.picoservice:picoservice-core` and configure the
-processor using the [explicit configuration](#configure-the-annotation-processor) above. The Java
-packages and APIs remain the same. Do not add `picoservice-processor` as a normal application
-dependency: it is only needed while compiling.
-
-Example of usage
-----------------
+## Example of usage
 
 Custom annotation which is put on classes for registration:
 
@@ -151,3 +138,13 @@ public class Test
   }
 }
 ```
+
+## Migrating from 1.1.x to 1.2.0
+
+This is completely **optional** - the `de.adito.picoservice:picoservice` dependency continues to work through the compatibility artifact.
+
+To migrate to the split setup, replace it with
+`de.adito.picoservice:picoservice-core` and configure the
+processor using the [explicit configuration](#configure-the-annotation-processor) above. The Java
+packages and APIs remain the same. Do not add `picoservice-processor` as a normal application
+dependency: it is only needed while compiling.
