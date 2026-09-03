@@ -44,6 +44,15 @@ public class AnnotationProcessorPico extends AbstractProcessor
   private final Set<TypeElement> processedElements = new HashSet<>();
   private final Set<String> generatedServices = new LinkedHashSet<>();
 
+  private static boolean _isSupportedEnclosingElement(Element pElement)
+  {
+    // The semantic ElementKind predicates keep this Java 8-compiled processor forward compatible:
+    // isClass() covers classes, enums and records, while
+    // isInterface() also covers annotation types
+    // Executable and local contexts remain unsupported because generated top-level classes cannot reference them
+    ElementKind kind = pElement.getKind();
+    return kind == ElementKind.PACKAGE || kind.isClass() || kind.isInterface();
+  }
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
@@ -147,16 +156,6 @@ public class AnnotationProcessorPico extends AbstractProcessor
     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
         "Cannot generate pico registrations: neither javax.annotation.processing.Generated nor javax.annotation.Generated is available");
     return null;
-  }
-
-  private static boolean _isSupportedEnclosingElement(Element pElement)
-  {
-    // The semantic ElementKind predicates keep this Java 8-compiled processor forward compatible:
-    // isClass() covers classes, enums and records, while
-    // isInterface() also covers annotation types
-    // Executable and local contexts remain unsupported because generated top-level classes cannot reference them
-    ElementKind kind = pElement.getKind();
-    return kind == ElementKind.PACKAGE || kind.isClass() || kind.isInterface();
   }
 
   private boolean _isValidElement(Element pElement)
