@@ -24,7 +24,7 @@
   <licenses>
     <license>
       <name>MIT License</name>
-      <url>LICENSE.md</url>
+      <url>https://github.com/aditosoftware/picoservice/blob/master/LICENSE.md</url>
     </license>
   </licenses>
 
@@ -40,9 +40,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:aditosoftware/picoservice.git</connection>
-    <developerConnection>scm:git:git@github.com:aditosoftware/picoservice.git</developerConnection>
-    <url>git@github.com:aditosoftware/picoservice.git</url>
+    <connection>scm:git:https://github.com/aditosoftware/picoservice.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/aditosoftware/picoservice.git</developerConnection>
+    <url>https://github.com/aditosoftware/picoservice</url>
   </scm>
 
   <issueManagement>
@@ -51,7 +51,7 @@
   </issueManagement>
 
   <properties>
-    <revision>1.2.0-SNAPSHOT</revision>
+    <revision>1.2.0</revision>
     <maven.compiler.release>8</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
