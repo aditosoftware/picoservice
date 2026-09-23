@@ -1,6 +1,12 @@
 # exclude hidden directories
 /.*/*
 
+# Maven project extensions
+!/.mvn/
+!/.mvn/extensions.xml
+!/.mvn/maven-git-versioning-extension.xml
+**/.git-versioned-pom.xml
+
 # idea
 *.iml
 !/.idea/codeStyles/

@@ -30,6 +30,17 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <configuration>
+          <!-- we want to publish the compatibility artifact with actual contents and not only as a reference (maven central requirement) -->
+          <flattenMode>ossrh</flattenMode>
+          <pomElements>
+            <dependencies>remove</dependencies>
+          </pomElements>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
@@ -46,8 +57,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <createDependencyReducedPom>true</createDependencyReducedPom>
-              <generateUniqueDependencyReducedPom>true</generateUniqueDependencyReducedPom>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
               <filters>
                 <filter>
                   <artifact>de.adito.picoservice:*</artifact>
@@ -63,21 +73,6 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <!-- Clean the dependency-reduced POMs created by the Shade Plugin -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${project.basedir}</directory>
-              <includes>
-                <include>dependency-reduced-pom*.xml</include>
-              </includes>
-            </fileset>
-          </filesets>
-        </configuration>
       </plugin>
     </plugins>
   </build>

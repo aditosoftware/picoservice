@@ -51,7 +51,8 @@
   </issueManagement>
 
   <properties>
-    <revision>1.2.0</revision>
+    <!-- filled by maven git versioning extension -->
+    <revision>DEV</revision>
     <maven.compiler.release>8</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -132,11 +133,24 @@
     </pluginManagement>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${project.basedir}</directory>
+              <includes>
+                <include>.git-versioned-pom.xml</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>flatten-maven-plugin</artifactId>
         <configuration>
-          <flattenMode>resolveCiFriendliesOnly</flattenMode>
-          <updatePomFile>true</updatePomFile>
+          <flattenMode>oss</flattenMode>
         </configuration>
         <executions>
           <execution>
@@ -153,6 +167,7 @@
             </goals>
           </execution>
         </executions>
+
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -218,6 +233,10 @@
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>maven-central-repository</publishingServerId>
+              <excludeArtifacts>
+                <excludeArtifact>picoservice-parent</excludeArtifact>
+                <excludeArtifact>picoservice-integration-tests</excludeArtifact>
+              </excludeArtifacts>
             </configuration>
           </plugin>
         </plugins>

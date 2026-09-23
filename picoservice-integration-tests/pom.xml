@@ -14,6 +14,8 @@
   <name>${project.groupId}:${project.artifactId}</name>
 
   <properties>
+    <maven.jar.skip>true</maven.jar.skip>
+    <maven.install.skip>true</maven.install.skip>
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
@@ -40,6 +42,14 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <configuration>
+          <!-- flatten here has no benefit, so lets skip it -->
+          <skip>true</skip>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

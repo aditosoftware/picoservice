@@ -1,0 +1,23 @@
+<configuration xmlns="https://github.com/qoomon/maven-git-versioning-extension">
+  <refs>
+    <!-- A detached, non-tagged build deliberately falls back to the POM's DEV revision. -->
+    <ref type="branch">
+      <!-- use every branch as this is a tiny project -->
+      <pattern>.+</pattern>
+      <describeTagPattern><![CDATA[v(?<name>\d+(?:\.\d)*(?:[-_][A-Za-z0-9]+)?)]]></describeTagPattern>
+      <properties>
+        <!-- do not use ref name here, as this would be the branch name -->
+        <revision>${describe.tag.name:-INVALID}${dirty:-}${describe.distance.snapshot:-}</revision>
+        <project.build.outputTimestamp>${commit.timestamp}</project.build.outputTimestamp>
+      </properties>
+    </ref>
+    <ref type="tag">
+      <pattern><![CDATA[v(?<name>\d+(?:\.\d)*(?:[-_][A-Za-z0-9]+)?)]]></pattern>
+      <properties>
+        <!-- add the dirty as additional security check, detached head in pipeline should never have changes though -->
+        <revision>${ref.name}${dirty:-}</revision>
+        <project.build.outputTimestamp>${commit.timestamp}</project.build.outputTimestamp>
+      </properties>
+    </ref>
+  </refs>
+</configuration>
