@@ -72,6 +72,9 @@
             <id>default-testCompile</id>
             <configuration>
               <!-- testing the autodiscovery rather than explicit annotation-processor configuration here -->
+              <jdkToolchain>
+                <version>25</version>
+              </jdkToolchain>
               <proc>full</proc>
               <release>25</release>
             </configuration>

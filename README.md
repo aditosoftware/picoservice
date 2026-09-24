@@ -1,11 +1,36 @@
 # picoservice
 
-Picoservice is a java library for service registration and service lookup. With it, you can find classes that have special meaning in your project.
-Internally it uses java's `ServiceLoader` so it integrates nicely with you build tools. Nothing magical is happening here.
+Picoservice is a Java library for service registration and service lookup. With it, you can find classes that have special meaning in your project.
+Internally it uses Java's `ServiceLoader` so it integrates nicely with your build tools. Nothing magical is happening here.
 
 Picoservice is focused on its main purpose: registration and lookup. For registration, you have to annotate a custom annotation with `@PicoService`.
 Each class annotated with that custom annotation can afterwards be found by using
 `IPicoRegistry.INSTANCE.find(Class<C> pSearchedType, Class<A> pAnnotationClass)`.
+
+## Building the project
+
+The runtime and processor are compiled for Java 8. 
+The integration tests compile with Java 25 to verify annotation-processor auto-discovery on current JDKs, so a full reactor build requires a JDK 25 Maven toolchain.
+
+The `release` profile uses the same JDK 25 toolchain to create Javadocs.
+
+Configure JDK 25 in your Maven `toolchains.xml`.
+
+Example: `~/.m2/toolchains.xml`
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<toolchains>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <version>25</version>
+    </provides>
+    <configuration>
+      <jdkHome>/path/to/jdk-25</jdkHome>
+    </configuration>
+  </toolchain>
+</toolchains>
+```
 
 ## Get started
 
@@ -93,7 +118,7 @@ This lets `javac` find Picoservice and any other processors already on the compi
 It is convenient for existing projects, but explicit processor configuration is preferred: auto-discovery
 can run processors introduced unintentionally by a dependency. 
 
-Since JDK 23, annotation processing must be enabled explicitly; see he [javac documentation](https://docs.oracle.com/en/java/javase/25/docs/specs/man/javac.html).
+Since JDK 23, annotation processing must be enabled explicitly; see the [javac documentation](https://docs.oracle.com/en/java/javase/25/docs/specs/man/javac.html).
 
 ## Example of usage
 
@@ -134,7 +159,7 @@ public class Test
 {
   public static void main(String[] args)
   {
-    Map<Class<?>, TestAnno> map = IPicoRegistry.INSTANCE.find(Object.class, TestAnno.class);
+    var map = IPicoRegistry.INSTANCE.find(Object.class, TestAnno.class);
   }
 }
 ```
