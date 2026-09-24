@@ -14,9 +14,12 @@
   <name>${project.groupId}:${project.artifactId}</name>
 
   <properties>
-    <maven.jar.skip>true</maven.jar.skip>
+    <!-- This module exists only to run integration tests and is never released. -->
     <maven.install.skip>true</maven.install.skip>
     <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.source.skip>true</maven.source.skip>
+    <maven.javadoc.skip>true</maven.javadoc.skip>
+    <gpg.skip>true</gpg.skip>
   </properties>
 
   <dependencies>
@@ -49,6 +52,17 @@
           <!-- flatten here has no benefit, so lets skip it -->
           <skip>true</skip>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <!-- no jar required for the integration tests -->
+          <execution>
+            <id>default-jar</id>
+            <phase>none</phase>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

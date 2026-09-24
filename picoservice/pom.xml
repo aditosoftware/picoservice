@@ -49,6 +49,22 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <!-- The compatibility JAR is assembled from these dependencies and has no own sources. -->
+          <includeDependencySources>true</includeDependencySources>
+          <!-- jsr305 is provided by picoservice-core and therefore is not transitive here. -->
+          <additionalDependencies>
+            <additionalDependency>
+              <groupId>com.google.code.findbugs</groupId>
+              <artifactId>jsr305</artifactId>
+              <version>${jsr305.version}</version>
+            </additionalDependency>
+          </additionalDependencies>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <executions>
           <execution>
@@ -58,6 +74,8 @@
             </goals>
             <configuration>
               <createDependencyReducedPom>false</createDependencyReducedPom>
+              <!-- Attach the sources of the classes included in the compatibility JAR. -->
+              <createSourcesJar>true</createSourcesJar>
               <filters>
                 <filter>
                   <artifact>de.adito.picoservice:*</artifact>

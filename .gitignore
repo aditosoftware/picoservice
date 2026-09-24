@@ -1,5 +1,7 @@
 # exclude hidden directories
 /.*/*
+!/.run/
+!/.run/*.xml
 
 # Maven project extensions
 !/.mvn/
